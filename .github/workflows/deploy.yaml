@@ -24,7 +24,8 @@ jobs:
 
       - name: Set Service Key for Ansible
         run: |
-          printf '%s' "${{ secrets.GKE_SA_KEY }}" | jq '.' > $GITHUB_WORKSPACE/gcp_existsa_key.json
+          - run: echo "${{ secrets.GKE_SA_KEY }}"
+
 
       - name: Run Ansible for GCP / GKE init
         run: |
