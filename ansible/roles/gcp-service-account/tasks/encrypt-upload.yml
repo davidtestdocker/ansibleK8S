@@ -1,0 +1,54 @@
+- name: Read service account JSON
+  slurp:
+    src: "{{ gcp_gen_key }}"
+  register: raw_key
+  failed_when: auth_result.rc != 0
+
+- name: Decode JSON
+  set_fact:
+    key_json: "{{ raw_key.content | b64decode }}"
+
+- name: Fetch GitHub repo public key
+  uri:
+    url: "https://api.github.com/repos/{{ github_owner }}/{{ github_repo }}/actions/secrets/public-key"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ github_token }}"
+  register: github_key
+
+- name: Encrypt using PyNaCl (GitHub libsodium)
+  shell: |
+    python3 - << 'EOF'
+    import base64
+    from nacl import encoding, public
+
+    # GitHub Public Key
+    public_key = "{{ github_key.json.key }}"
+
+    # The JSON key content
+    secret_value = """{{ key_json | to_nice_json }}"""
+
+    public_key_bytes = base64.b64decode(public_key)
+    pk = public.PublicKey(public_key_bytes, encoding.RawEncoder())
+
+    sealed_box = public.SealedBox(pk)
+    encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
+
+    print(base64.b64encode(encrypted).decode("utf-8"))
+    EOF
+  args:
+    executable: /bin/bash
+  register: encrypted_secret
+
+- name: Upload encrypted key to GitHub Secret
+  uri:
+    url: "https://api.github.com/repos/{{ github_owner }}/{{ github_repo }}/actions/secrets/{{ github_secret_name }}"
+    method: PUT
+    headers:
+      Authorization: "Bearer {{ github_token }}"
+    body_format: json
+    body:
+      encrypted_value: "{{ encrypted_secret.stdout }}"
+      key_id: "{{ github_key.json.key_id }}"
+    status_code: [200, 201]
+

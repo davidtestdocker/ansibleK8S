@@ -1,0 +1,33 @@
+name: Deploy MultiK8s
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  SHA: ${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+
+      - name: Install Ansible + Python deps
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip3 install ansible google-auth requests
+          ansible --version
+
+      - name: Set Service Key for Ansible
+        run: |
+          echo "${{ secrets.GKE_SA_KEY }}" > gcp_existsa_key.json
+
+      - name: Run Ansible for GCP / GKE init
+        run: |
+          ansible-playbook ansible/playbooks/setup-gcp.yml \
+            --extra-vars "gcp_existing_key=gcp_existsa_key.json"
+

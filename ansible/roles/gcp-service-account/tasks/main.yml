@@ -1,0 +1,5 @@
+- include_tasks: auth.yml
+  tags: auth
+
+- include_tasks: create_sa.yml
+  tags: createsa
