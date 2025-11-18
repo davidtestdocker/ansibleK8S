@@ -3,7 +3,7 @@ gcp_project_id: "k8stest-478013"
 gcp_sa_name: "ghac-deployer2"
 gcp_sa_display_name: "ghac-deployer2"
 gcp_existing_key: ""
-gcp_gen_key: ""
+gcp_gen_key: "/root/gen_key.json"
 
 # GitHub
 github_owner: "davidtestdocker"
