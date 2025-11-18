@@ -1,6 +1,6 @@
 - name: Generate key for new service account
   command: >
-    gcloud iam service-accounts keys create {{ gcp_gen_key }}
+    gcloud iam service-accounts keys create {{ gcp_gen_key_gh }}
     --iam-account {{ gcp_sa_name }}@{{ gcp_project_id }}.iam.gserviceaccount.com
     --project {{ gcp_project_id }}
   register: key_result
