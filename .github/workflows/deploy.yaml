@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Ansible for GCP / GKE init
         run: |
-          cd ansible      
-          ansible-playbook ansible/playbooks/setup-gcp.yml \
+          cd ansible
+          ansible-playbook playbooks/setup-gcp.yml \
             --extra-vars "gcp_existing_key=gcp_existsa_key.json"
 
