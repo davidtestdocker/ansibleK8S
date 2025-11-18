@@ -27,9 +27,3 @@ jobs:
           echo "${{ secrets.GKE_SA_KEY }}"
 
 
-      - name: Run Ansible for GCP / GKE init
-        run: |
-          cd ansible
-          ansible-playbook playbooks/setup-gcp.yml \
-            --extra-vars "gcp_existing_key=$GITHUB_WORKSPACE/gcp_existsa_key.json"
-
