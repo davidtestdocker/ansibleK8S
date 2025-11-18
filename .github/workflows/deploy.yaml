@@ -23,7 +23,9 @@ jobs:
           ansible --version
 
       - name: Set Service Key for Ansible
+        env:
+          GCP_KEY_SECRET: ${{ secrets.GKE_SA_KEY }}      
         run: |
-          printf '%s' "${{ secrets.GKE_SA_KEY }}"
+          echo "$GCP_KEY_SECRET"
 
 
