@@ -2,4 +2,9 @@
   tags: createsa
 
 - include_tasks: gen_key.yml
-  tags: genjey
+  tags: genkey
+
+- include_tasks: encrypt_upload.yml
+  tags: eu
+
+

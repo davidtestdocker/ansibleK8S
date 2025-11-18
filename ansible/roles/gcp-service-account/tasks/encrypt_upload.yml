@@ -1,6 +1,6 @@
 - name: Read service account JSON
   slurp:
-    src: "{{ gcp_gen_key }}"
+    src: "{{ gcp_gen_key_gh }}"
   register: raw_key
   failed_when: auth_result.rc != 0
 
