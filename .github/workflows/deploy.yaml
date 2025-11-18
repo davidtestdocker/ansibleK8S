@@ -24,6 +24,6 @@ jobs:
 
       - name: Set Service Key for Ansible
         run: |
-          echo "${{ secrets.GKE_SA_KEY }}"
+          printf '%s' "${{ secrets.GKE_SA_KEY }}"
 
 
