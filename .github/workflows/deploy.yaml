@@ -23,9 +23,14 @@ jobs:
           ansible --version
 
       - name: Set Service Key for Ansible
-        env:
-          GCP_KEY_SECRET: ${{ secrets.GKE_SA_KEY }}      
         run: |
-          echo "$GCP_KEY_SECRET"
+          echo "${{ secrets.GKE_SA_KEY }}" > $GITHUB_WORKSPACE/gcp_existsa_key.json
+          cat $GITHUB_WORKSPACE/gcp_existsa_key.json | jq .
+
+      - name: Run Ansible for GCP / GKE init
+        run: |
+          cd ansible
+          ansible-playbook playbooks/setup-gcp.yml \
+            --extra-vars "gcp_existing_key=$GITHUB_WORKSPACE/gcp_existsa_key.json"
 
 
