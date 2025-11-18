@@ -1,9 +1,4 @@
-name: Deploy MultiK8s
 
-on:
-  push:
-    branches:
-      - master
 
 env:
   SHA: ${{ github.sha }}
