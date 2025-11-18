@@ -1,2 +1,5 @@
 - include_tasks: create_sa.yml
   tags: createsa
+
+- include_tasks: gen_key.yml
+  tags: genjey
