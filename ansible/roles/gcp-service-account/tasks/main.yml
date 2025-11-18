@@ -4,7 +4,9 @@
 - include_tasks: gen_key.yml
   tags: genkey
 
-- include_tasks: encrypt_upload.yml
-  tags: eu
+- include_tasks: auth_new_sa.yml
+  tags: auth
+
+ 
 
 

@@ -1,7 +1,7 @@
 - name: login gcloud new create service account
   command: >
     gcloud auth activate-service-account
-    --key-file={{ gcp_existing_key }}
+    --key-file={{ gcp_gen_key_gh }}
   register: auth_result
   failed_when: auth_result.rc != 0
 

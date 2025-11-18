@@ -2,7 +2,7 @@
   slurp:
     src: "{{ gcp_gen_key_gh }}"
   register: raw_key
-  failed_when: auth_result.rc != 0
+  failed_when: raw_key.rc != 0
 
 - name: Decode JSON
   set_fact:
