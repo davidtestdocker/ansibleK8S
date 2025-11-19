@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Ansible for create SA
         env:
-        GITHUB_WORKSPACE: $GITHUB_WORKSPACE
+          GITHUB_WORKSPACE: $GITHUB_WORKSPACE
         run: |
           cd ansible
           ansible-playbook playbooks/setup-gcp.yml
