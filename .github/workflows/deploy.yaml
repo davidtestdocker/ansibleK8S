@@ -36,6 +36,11 @@ jobs:
         run: |
           cd ansible
           ansible-playbook playbooks/setup-gcp.yml
+
+      - name: echo key
+        run: |
+          cat $GITHUB_WORKSPACE/gcp_gen_key.json      
+
             
 
 
