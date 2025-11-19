@@ -33,13 +33,12 @@ jobs:
           project_id: k8stest-478013
 
       - name: Run Ansible for create SA
+        env:
+        GITHUB_WORKSPACE: $GITHUB_WORKSPACE
         run: |
           cd ansible
           ansible-playbook playbooks/setup-gcp.yml
 
-      - name: echo key
-        run: |
-          cat $GITHUB_WORKSPACE/gcp_gen_key.json      
 
             
 
