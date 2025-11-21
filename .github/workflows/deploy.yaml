@@ -40,3 +40,14 @@ jobs:
 
           docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-worker:${IMAGE_TAG} ./worker
           docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-worker:${IMAGE_TAG}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init & apply
+        working-directory: /tf-gke-autopilot
+        run: |
+          terraform init -input=false
+          terraform apply -auto-approve -input=false \
+            -var="project_id=${PROJECT_ID}" \
+            -var="region=${REGION}"

@@ -22,6 +22,6 @@ resource "google_service_account" "gke_sa" {
 
 resource "google_project_iam_member" "gke_sa_artifact_registry" {
   project = var.project_id
-  role    = "roles/artifactregistry.reader"
+  role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:${google_service_account.gke_sa.email}"
 }
