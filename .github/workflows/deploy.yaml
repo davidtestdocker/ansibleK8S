@@ -10,7 +10,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: ${{ secrets.GCP_REGION }}
   CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
-  ARTIFACT_REPO: ${{ARTIFACT_REPO}}
+  ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO}}
 
 jobs:
   build:
