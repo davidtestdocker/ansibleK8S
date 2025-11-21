@@ -51,7 +51,7 @@ jobs:
 
 
       - name: Terraform init & apply
-        working-directory: ./terraform
+        working-directory: ./tf-gke-autopilot
         run: |
           terraform init -input=false
           terraform plan -input=false \
