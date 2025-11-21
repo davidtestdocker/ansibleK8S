@@ -36,7 +36,7 @@ jobs:
           docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-client:${IMAGE_TAG}
 
           docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-server:${IMAGE_TAG} ./server
-          docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-server:${{IMAGE_TAG}
+          docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-server:${IMAGE_TAG}
 
           docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-worker:${IMAGE_TAG} ./worker
           docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-worker:${IMAGE_TAG}
