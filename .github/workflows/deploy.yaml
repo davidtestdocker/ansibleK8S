@@ -23,10 +23,10 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           credentials_json: ${{ secrets.GCP_SA_KEY }} 
           export_default_credentials: true          
+          create_credentials_file: true
 
       - name: Debug Cloud
         run: |
-          echo "環境變數 PROJECT_ID (用於檢查隱形字元): '${{ env.PROJECT_ID }}'"
           gcloud auth list
 
       - name: Configure Docker auth for Artifact Registry
