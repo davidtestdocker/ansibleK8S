@@ -45,15 +45,33 @@ jobs:
 
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }} ./worker
           docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }}
-
+     #---------------------------------------------------------------------------------------------------------------------------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+
       - name: Terraform init & apply
-        working-directory: ./tf-gke-autopilot
+        working-directory: ./terraform
         run: |
           terraform init -input=false
-          terraform apply -auto-approve -input=false \
-            -var="project_id=${{ env.PROJECT_ID }}" \
-            -var="region=${{ env.REGION }}"
+          terraform plan -input=false \
+            -var="project_id=${PROJECT_ID}" \
+            -var="region=${REGION}"
+     #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
+      - name: Install Ansible + k8s collection
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+          ansible-galaxy collection install kubernetes.core
+
+      - name: Run Ansible deploy
+        working-directory: ./ansible
+        env:
+          PROJECT_ID: ${{ env.PROJECT_ID }}
+          REGION: ${{ env.REGION }}
+          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
+        run: |
+          ansible-playbook -i inventory deploy-client.yaml
