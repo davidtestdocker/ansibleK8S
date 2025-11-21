@@ -26,7 +26,7 @@ jobs:
 
       - name: Configure Docker auth for Artifact Registry
         run: |
-          gcloud --quiet auth configure-docker asua-east1-docker.pkg.dev 
+          gcloud --quiet auth configure-docker asia-east1-docker.pkg.dev 
 
       - name: Build & push images
         run: |
