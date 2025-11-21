@@ -1,3 +1,13 @@
+name: CI-CD to GKE Autopilot (Terraform + Ansible)
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
 env:
   IMAGE_TAG: ${{ github.sha }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
