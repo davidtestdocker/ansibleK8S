@@ -1,9 +1,0 @@
-- name: Create service account
-  command: >
-    gcloud iam service-accounts create {{ gcp_sa_name }}
-    --display-name "{{ gcp_sa_display_name }}"
-    --project {{ gcp_project_id }}
-  register: sa_result
-  failed_when: sa_result.rc !=0
-
-
