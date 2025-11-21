@@ -25,7 +25,7 @@ jobs:
           export_default_credentials: true          
 
       - name: Debug Cloud
-        run:
+        run: |
           echo "環境變數 PROJECT_ID (用於檢查隱形字元): '${{ env.PROJECT_ID }}'"
           gcloud auth list
 
