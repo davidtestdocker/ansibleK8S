@@ -1,16 +1,9 @@
-name: Deploy MultiK8s
-
-on:
-  push:
-    branches:
-      - master
-
 env:
   IMAGE_TAG: ${{ github.sha }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: ${{ secrets.GCP_REGION }}
   CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
-  ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO}}
+  ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO }}
 
 jobs:
   build:
@@ -18,28 +11,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-            
+
       - name: Configure Docker auth for Artifact Registry
         run: |
-          gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+          gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
 
-      - name: Build & push client image
+      - name: Build & push images
         run: |
-          docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-client:${IMAGE_TAG} ./client
-          docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-client:${IMAGE_TAG}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-client:$IMAGE_TAG ./client
+          docker push    $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-client:$IMAGE_TAG
 
-          docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-server:${IMAGE_TAG} ./server
-          docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-server:${IMAGE_TAG}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-server:$IMAGE_TAG ./server
+          docker push    $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-server:$IMAGE_TAG
 
-          docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-worker:${IMAGE_TAG} ./worker
-          docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/multi-worker:${IMAGE_TAG}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-worker:$IMAGE_TAG ./worker
+          docker push    $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-worker:$IMAGE_TAG
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
