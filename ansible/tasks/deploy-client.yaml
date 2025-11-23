@@ -1,71 +1,57 @@
+- name: Get GKE credentials
+  ansible.builtin.command: >
+    gcloud container clusters get-credentials {{ cluster_name }}
+    --region {{ region }}
+    --project {{ project_id }}
+  changed_when: false
 
-  vars:
-    project_id: "{{ lookup('env', 'PROJECT_ID') }}"
-    region: "{{ lookup('env', 'REGION') }}"
-    cluster_name: "{{ lookup('env', 'CLUSTER_NAME') }}"
-    image_tag: "{{ lookup('env', 'IMAGE_TAG') }}"
-    artifact_repo: "{{ lookup('env', 'ARTIFACT_REPO') }}"
-    namespace: "multi-app"
+- name: Ensure namespace exists
+  kubernetes.core.k8s:
+    state: present
+    kind: Namespace
+    name: "{{ namespace }}"
 
-
-    # 1. GKE Kubeconfig
-    - name: Get GKE credentials
-      ansible.builtin.command: >
-        gcloud container clusters get-credentials {{ cluster_name }}
-        --region {{ region }}
-        --project {{ project_id }}
-      changed_when: false
-
-    # 2. 確保 namespace 存在
-    - name: Ensure namespace exists
-      kubernetes.core.k8s:
-        state: present
-        kind: Namespace
-        name: "{{ namespace }}"
-
-    # 3. client Deployment
-    - name: Deploy client deployment
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: apps/v1
-          kind: Deployment
+- name: Deploy client deployment
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: client-deployment
+        namespace: "{{ namespace }}"
+        labels:
+          component: web
+      spec:
+        replicas: 3
+        selector:
+          matchLabels:
+            component: web
+        template:
           metadata:
-            name: client-deployment
-            namespace: "{{ namespace }}"
             labels:
               component: web
           spec:
-            replicas: 3
-            selector:
-              matchLabels:
-                component: web
-            template:
-              metadata:
-                labels:
-                  component: web
-              spec:
-                containers:
-                  - name: client
-                    image: "{{ region }}-docker.pkg.dev/{{ project_id }}/{{ artifact_repo }}/multi-client:{{ image_tag }}"
-                    ports:
-                      - containerPort: 3000
+            containers:
+              - name: client
+                image: "{{ region }}-docker.pkg.dev/{{ project_id }}/{{ artifact_repo }}/multi-client:{{ image_tag }}"
+                ports:
+                  - containerPort: 3000
 
-    # 4. client Service
-    - name: Deploy client service
-      kubernetes.core.k8s:
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: client-clusterip-service
-            namespace: "{{ namespace }}"
-          spec:
-            type: ClusterIP
-            selector:
-              component: web
-            ports:
-              - port: 3000
-                targetPort: 3000
+- name: Deploy client service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: client-clusterip-service
+        namespace: "{{ namespace }}"
+      spec:
+        type: ClusterIP
+        selector:
+          component: web
+        ports:
+          - port: 3000
+            targetPort: 3000
 
