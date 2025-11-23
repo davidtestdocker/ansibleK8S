@@ -1,0 +1,51 @@
+---
+- name: Deploy Redis to GKE
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Apply Redis Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: redis-deployment
+            labels:
+              app: redis
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                component: redis
+            template:
+              metadata:
+                labels:
+                  component: redis
+              spec:
+                containers:
+                  - name: redis
+                    image: redis
+                    ports:
+                      - containerPort: 6379
+
+    - name: Apply Redis ClusterIP Service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: redis-clusterip-service
+            labels:
+              app: redis
+          spec:
+            type: ClusterIP
+            selector:
+              component: redis
+            ports:
+              - port: 6379
+                targetPort: 6379
+

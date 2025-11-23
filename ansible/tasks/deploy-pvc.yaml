@@ -1,0 +1,22 @@
+---
+- name: Create PostgreSQL PersistentVolumeClaim
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Apply database PersistentVolumeClaim
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: database-persistent-volume-claim
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 2Gi
+

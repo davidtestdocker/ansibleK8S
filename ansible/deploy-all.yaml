@@ -1,0 +1,25 @@
+---
+- name: Deploy full multi-service stack to GKE
+  hosts: localhost
+  gather_facts: no
+
+
+  tasks:
+    - name: Deploy PVC
+      import_tasks: tasks/deploy-pvc.yaml
+
+    - name: Deploy PostgreSQL
+      import_tasks: tasks/deploy-postgres.yaml
+
+    - name: Deploy Redis
+      import_tasks: tasks/deploy-redis.yaml
+
+    - name: Deploy Server
+      import_tasks: tasks/deploy-server.yaml
+
+    - name: Deploy Worker
+      import_tasks: tasks/deploy-worker.yaml
+
+    - name: Deploy Client
+      import_tasks: tasks/deploy-client.yaml
+

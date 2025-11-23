@@ -1,0 +1,65 @@
+---
+- name: Deploy PostgreSQL to GKE
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Apply Postgres Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: postgres-deployment
+            labels:
+              app: postgres
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                component: postgres
+            template:
+              metadata:
+                labels:
+                  component: postgres
+              spec:
+                volumes:
+                  - name: postgres-storage
+                    persistentVolumeClaim:
+                      claimName: database-persistent-volume-claim
+                containers:
+                  - name: postgres
+                    image: postgres
+                    ports:
+                      - containerPort: 5432
+                    volumeMounts:
+                      - name: postgres-storage
+                        mountPath: /var/lib/postgresql
+                        subPath: postgres
+                    env:
+                      - name: POSTGRES_PASSWORD
+                        valueFrom:
+                          secretKeyRef:
+                            name: pgpassword
+                            key: PGPASSWORD
+
+    - name: Apply Postgres ClusterIP Service
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: postgres-clusterip-service
+            labels:
+              app: postgres
+          spec:
+            type: ClusterIP
+            selector:
+              component: postgres
+            ports:
+              - port: 5432
+                targetPort: 5432
+

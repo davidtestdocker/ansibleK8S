@@ -1,0 +1,36 @@
+---
+- name: Deploy worker application to GKE
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Apply worker Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: worker-deployment
+            labels:
+              app: worker
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                component: worker
+            template:
+              metadata:
+                labels:
+                  component: worker
+              spec:
+                containers:
+                  - name: worker
+                    image: "{{ region }}-docker.pkg.dev/{{ project_id }}/{{ artifact_repo }}/multi-worker:{{ image_tag }}"
+                    env:
+                      - name: REDIS_HOST
+                        value: redis-clusterip-service
+                      - name: REDIS_PORT
+                        value: "6379"
+

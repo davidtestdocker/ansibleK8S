@@ -74,4 +74,4 @@ jobs:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
         run: |
-          ansible-playbook -i inventory deploy-client.yaml
+          ansible-playbook -i inventory deploy-all.yaml
