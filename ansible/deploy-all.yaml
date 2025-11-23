@@ -3,6 +3,30 @@
   hosts: localhost
   gather_facts: no
 
+  vars:
+    project_id: "{{ lookup('env','PROJECT_ID') }}"
+    region: "{{ lookup('env','REGION') }}"
+    cluster_name: "{{ lookup('env','CLUSTER_NAME') }}"
+    image_tag: "{{ lookup('env','IMAGE_TAG') }}"
+    artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
+    namespace: "multi-app"
+
+  tasks:
+    - name: Get GKE credentials
+      ansible.builtin.command: >
+        gcloud container clusters get-credentials {{ cluster_name }}
+        --region {{ region }}
+        --project {{ project_id }}
+      changed_when: false
+
+    - name: Ensure namespace exists
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ namespace }}"
 
   tasks:
     - name: Deploy PVC

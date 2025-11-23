@@ -1,16 +1,3 @@
-- name: Get GKE credentials
-  ansible.builtin.command: >
-    gcloud container clusters get-credentials {{ cluster_name }}
-    --region {{ region }}
-    --project {{ project_id }}
-  changed_when: false
-
-- name: Ensure namespace exists
-  kubernetes.core.k8s:
-    state: present
-    kind: Namespace
-    name: "{{ namespace }}"
-
 - name: Deploy client deployment
   kubernetes.core.k8s:
     state: present
