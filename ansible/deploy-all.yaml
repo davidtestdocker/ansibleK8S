@@ -12,6 +12,10 @@
     namespace: "multi-app"
 
   tasks:
+
+    # -----------------------------------------------------
+    # 1. 初始化 kubeconfig（一定要第一個）
+    # -----------------------------------------------------
     - name: Get GKE credentials
       ansible.builtin.command: >
         gcloud container clusters get-credentials {{ cluster_name }}
@@ -19,6 +23,9 @@
         --project {{ project_id }}
       changed_when: false
 
+    # -----------------------------------------------------
+    # 2. Namespace
+    # -----------------------------------------------------
     - name: Ensure namespace exists
       kubernetes.core.k8s:
         state: present
@@ -28,7 +35,9 @@
           metadata:
             name: "{{ namespace }}"
 
-  tasks:
+    # -----------------------------------------------------
+    # 3. Import tasks (依順序)
+    # -----------------------------------------------------
     - name: Deploy PVC
       import_tasks: tasks/deploy-pvc.yaml
 
