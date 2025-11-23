@@ -1,9 +1,6 @@
----
 - name: Deploy Redis to GKE
   hosts: localhost
   gather_facts: no
-
-  tasks:
 
     - name: Apply Redis Deployment
       kubernetes.core.k8s:

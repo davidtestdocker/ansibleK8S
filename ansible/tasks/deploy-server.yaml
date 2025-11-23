@@ -1,9 +1,4 @@
----
-- name: Deploy server application to GKE
-  hosts: localhost
-  gather_facts: no
 
-  tasks:
 
     - name: Apply server Deployment
       kubernetes.core.k8s:

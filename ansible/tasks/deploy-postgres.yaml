@@ -1,11 +1,4 @@
----
-- name: Deploy PostgreSQL to GKE
-  hosts: localhost
-  gather_facts: no
-
-  tasks:
-
-    - name: Apply Postgres Deployment
+- name: Apply Postgres Deployment
       kubernetes.core.k8s:
         state: present
         definition:
@@ -45,7 +38,7 @@
                             name: pgpassword
                             key: PGPASSWORD
 
-    - name: Apply Postgres ClusterIP Service
+- name: Apply Postgres ClusterIP Service
       kubernetes.core.k8s:
         state: present
         definition:

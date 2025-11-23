@@ -1,11 +1,5 @@
----
-- name: Create PostgreSQL PersistentVolumeClaim
-  hosts: localhost
-  gather_facts: no
 
-  tasks:
-
-    - name: Apply database PersistentVolumeClaim
+- name: Apply database PersistentVolumeClaim
       kubernetes.core.k8s:
         state: present
         definition:
