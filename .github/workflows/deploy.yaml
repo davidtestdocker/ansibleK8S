@@ -10,6 +10,7 @@ env:
   REGION: ${{ secrets.GCP_REGION }}
   CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
   ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO }}
+  KUBECONFIG: ${{ runner.home }}/.kube/config
 
 jobs:
   build:
@@ -118,6 +119,6 @@ jobs:
           CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
-          KUBECONFIG: "/home/runner/.kube/config"
+          KUBECONFIG: ${{ env.KUBECONFIG }}
         run: |
           ansible-playbook -i inventory deploy-all.yaml

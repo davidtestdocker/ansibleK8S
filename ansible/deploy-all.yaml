@@ -23,14 +23,6 @@
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）
     # -----------------------------------------------------
-    - name: Get GKE credentials
-      ansible.builtin.command: >
-        gcloud container clusters get-credentials {{ cluster_name }}
-        --region {{ region }}
-        --project {{ project_id }}
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"      
-      changed_when: false
 
     # -----------------------------------------------------
     # (2) Debug — 確認 kubeconfig 是否正確寫入
@@ -51,6 +43,8 @@
           kind: Namespace
           metadata:
             name: "{{ ns }}"
+        kubeconfig: "{{ kubeconfig_path }}"
+      register: ns_result
 
     # -----------------------------------------------------
     # (4) Import tasks (依順序)
