@@ -38,6 +38,8 @@ jobs:
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
+      - name: Debug Kubeconfig Content
+        run: cat $HOME/.kube/config # 輸出 Kubeconfig 內容，以便檢查 user 區塊
 
       - name: Configure Docker auth for Artifact Registry
         run: |
