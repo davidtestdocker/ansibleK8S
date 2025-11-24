@@ -74,5 +74,7 @@ jobs:
           CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
+          K8S_AUTH_KUBECONFIG: "/home/runner/.kube/config"
+          KUBECONFIG: "/home/runner/.kube/config"
         run: |
           ansible-playbook -i inventory deploy-all.yaml
