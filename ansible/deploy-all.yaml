@@ -13,17 +13,13 @@
 
   environment:
     KUBECONFIG: "/home/runner/.kube/config"
+    K8S_AUTH_KUBECONFIG: "/home/runner/.kube/config"
 
   tasks:
     - name: Ensure kube folder exists
       ansible.builtin.command: mkdir -p /home/runner/.kube
       changed_when: false
 
-    - name: Activate service account
-      ansible.builtin.command: >
-        gcloud auth activate-service-account
-        --key-file=/home/runner/gcp-sa.json
-      changed_when: false
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）
     # -----------------------------------------------------
