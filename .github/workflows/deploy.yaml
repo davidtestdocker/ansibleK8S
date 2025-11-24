@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "===== Describe (ZONAL) ====="
           gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-          --zone ${{ env.REGION }}-a \
+          --region ${{ env.REGION }} \
           --project ${{ env.PROJECT_ID }} || echo "❌ Zonal describe failed"
 
       # ------------------------------------------------------------------
