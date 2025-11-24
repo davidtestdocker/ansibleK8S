@@ -22,7 +22,7 @@
     - name: Activate service account
       ansible.builtin.command: >
         gcloud auth activate-service-account
-        --key-file=/home/runner/gcloud.json
+        --key-file=/home/runner/gcp-sa.json
       changed_when: false
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）
