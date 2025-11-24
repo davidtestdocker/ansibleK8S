@@ -1,7 +1,6 @@
 resource "google_container_cluster" "autopilot" {
   name     = var.cluster_name     # 你的叢集名稱
   location = var.region           # Autopilot 使用「region」不是 zone
-
   enable_autopilot = true         # 🌟 啟用 Autopilot 模式的新版寫法
                                   # 不再使用 autopilot { enabled = true }
 

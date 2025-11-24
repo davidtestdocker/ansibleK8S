@@ -45,7 +45,7 @@ jobs:
         run: |
           echo "===== Try describing cluster ====="
           gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-            --region ${{ env.REGION }} \
+            --zone ${{ env.REGION }}-a \
             --project ${{ env.PROJECT_ID }} || echo "❌ Cannot describe cluster"
 
       # ------------------------------------------------------------------
