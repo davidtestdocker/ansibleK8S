@@ -1,23 +1,17 @@
 ---
 - name: Deploy full multi-service stack to GKE
   hosts: localhost
-  gather_facts: no
-
-  vars:
-    project_id: "{{ lookup('env','PROJECT_ID') }}"
-    region: "{{ lookup('env','REGION') }}"
-    cluster_name: "{{ lookup('env','CLUSTER_NAME') }}"
-    image_tag: "{{ lookup('env','IMAGE_TAG') }}"
-    artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
-    ns: "multi-app"
+  gather_facts: false
 
   environment:
     KUBECONFIG: "{{ lookup('env','KUBECONFIG') }}"
 
   tasks:
-
+    # --------------------------
+    # Debug kubeconfig
+    # --------------------------
     - name: Debug kubeconfig inside Ansible
-      command: cat "{{ lookup('env','KUBECONFIG') }}"
+      shell: cat "{{ lookup('env','KUBECONFIG') }}"
       changed_when: false
 
     # --------------------------
@@ -30,7 +24,7 @@
           apiVersion: v1
           kind: Namespace
           metadata:
-            name: "{{ ns }}"
+            name: multi-app
 
     # --------------------------
     # Deploy PVC
