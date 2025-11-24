@@ -3,6 +3,10 @@
   hosts: localhost
   gather_facts: no
 
+  # 強制指定 kubeconfig 給 kubernetes.core.k8s
+  environment:
+    KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
+
   vars:
     project_id: "{{ lookup('env','PROJECT_ID') }}"
     region: "{{ lookup('env','REGION') }}"
@@ -14,7 +18,14 @@
   tasks:
 
     # -----------------------------------------------------
-    # 1. 初始化 kubeconfig（一定要第一個）
+    # (Debug Step) — 確認 gcloud 是否真的登入成功
+    # -----------------------------------------------------
+    - name: Debug gcloud auth
+      ansible.builtin.command: gcloud auth list
+      changed_when: false
+
+    # -----------------------------------------------------
+    # (1) 初始化 kubeconfig（一定要第一個）
     # -----------------------------------------------------
     - name: Get GKE credentials
       ansible.builtin.command: >
@@ -24,7 +35,14 @@
       changed_when: false
 
     # -----------------------------------------------------
-    # 2. Namespace
+    # (Debug Step) — 確認 kubeconfig 是否成功寫入
+    # -----------------------------------------------------
+    - name: Debug kubeconfig
+      ansible.builtin.command: cat ~/.kube/config
+      changed_when: false
+
+    # -----------------------------------------------------
+    # (2) Namespace
     # -----------------------------------------------------
     - name: Ensure namespace exists
       kubernetes.core.k8s:
@@ -36,7 +54,7 @@
             name: "{{ namespace }}"
 
     # -----------------------------------------------------
-    # 3. Import tasks (依順序)
+    # (3) Import tasks (依順序)
     # -----------------------------------------------------
     - name: Deploy PVC
       import_tasks: tasks/deploy-pvc.yaml
