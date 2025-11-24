@@ -23,7 +23,7 @@
     - name: Get GKE credentials
       ansible.builtin.command: >
         gcloud container clusters get-credentials {{ cluster_name }}
-        --zone {{ region }}-a
+        --region {{ region }}
         --project {{ project_id }}
       changed_when: false
 
