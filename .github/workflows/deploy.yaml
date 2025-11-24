@@ -14,8 +14,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      KUBECONFIG: ${{ runner.home }}/.kube/config
     steps:
       - uses: actions/checkout@v3
 
@@ -35,47 +33,11 @@ jobs:
       - name: Generate kubeconfig
         run: |
           mkdir -p $HOME/.kube
-          gcloud container clusters get-credentials \
+          KUBECONFIG=$HOME/.kube/config gcloud container clusters get-credentials \
             ${{ env.CLUSTER_NAME }} \
             --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }}
 
-      # ------------------------------------------------------------------
-      # 🔥 Debug 1: gcloud config 是否正常載入 SA？
-      # ------------------------------------------------------------------
-      - name: Debug gcloud active config
-        run: |
-          echo "===== gcloud config list ====="
-          gcloud config list
-          echo "===== gcloud auth list ====="
-          gcloud auth list
-
-      # ------------------------------------------------------------------
-      # 🔥 Debug 2: GKE cluster 描述權限
-      # ------------------------------------------------------------------
-      - name: Debug cluster describe (regional)
-        run: |
-          echo "===== Describe (REGIONAL) ====="
-          gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-          --region ${{ env.REGION }} \
-          --project ${{ env.PROJECT_ID }} || echo "❌ Regional describe failed"
-
-      - name: Debug cluster describe (zonal)
-        run: |
-          echo "===== Describe (ZONAL) ====="
-          gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-          --region ${{ env.REGION }} \
-          --project ${{ env.PROJECT_ID }} || echo "❌ Zonal describe failed"
-
-      # ------------------------------------------------------------------
-      # 🔥 Debug 3: 列出集群（確認 zonal/regional）
-      # ------------------------------------------------------------------
-      - name: Debug cluster list
-        run: |
-          echo "===== gcloud container clusters list ====="
-          gcloud container clusters list --project ${{ env.PROJECT_ID }}
-
-      # ------------------------------------------------------------------
 
       - name: Configure Docker auth for Artifact Registry
         run: |
@@ -122,4 +84,4 @@ jobs:
           ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
 
         run: |
-          ansible-playbook -i inventory deploy-all.yaml
+          KUBECONFIG=$HOME/.kube/config ansible-playbook -i inventory deploy-all.yaml
