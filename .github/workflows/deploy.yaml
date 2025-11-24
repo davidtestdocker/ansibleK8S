@@ -50,10 +50,10 @@ jobs:
 
       - name: Debug cluster describe (zonal)
         run: |
-        echo "===== Describe (ZONAL) ====="
-        gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-        --zone ${{ env.REGION }}-a \
-        --project ${{ env.PROJECT_ID }} || echo "❌ Zonal describe failed"
+          echo "===== Describe (ZONAL) ====="
+          gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
+          --zone ${{ env.REGION }}-a \
+          --project ${{ env.PROJECT_ID }} || echo "❌ Zonal describe failed"
 
       # ------------------------------------------------------------------
       # 🔥 Debug 3: 列出集群（確認 zonal/regional）
