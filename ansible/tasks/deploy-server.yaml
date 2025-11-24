@@ -8,6 +8,7 @@
           kind: Deployment
           metadata:
             name: server-deployment
+            namespace: multi-app
             labels:
               app: server
           spec:
@@ -52,6 +53,7 @@
           kind: Service
           metadata:
             name: server-clusterip-service
+            namespace: multi-app
             labels:
               app: server
           spec:
