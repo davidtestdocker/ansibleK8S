@@ -6,6 +6,7 @@
           kind: Deployment
           metadata:
             name: redis-deployment
+            namespace: multi-app
             labels:
               app: redis
           spec:
@@ -32,6 +33,7 @@
           kind: Service
           metadata:
             name: redis-clusterip-service
+            namespace: multi-app
             labels:
               app: redis
           spec:

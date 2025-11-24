@@ -6,7 +6,7 @@
       kind: Deployment
       metadata:
         name: client-deployment
-        namespace: "{{ namespace }}"
+        namespace: multi-app
         labels:
           component: web
       spec:
@@ -33,7 +33,7 @@
       kind: Service
       metadata:
         name: client-clusterip-service
-        namespace: "{{ namespace }}"
+        namespace: multi-app
       spec:
         type: ClusterIP
         selector:

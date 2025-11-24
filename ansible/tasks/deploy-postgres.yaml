@@ -6,6 +6,7 @@
           kind: Deployment
           metadata:
             name: postgres-deployment
+            namespace: multi-app
             labels:
               app: postgres
           spec:
@@ -46,6 +47,7 @@
           kind: Service
           metadata:
             name: postgres-clusterip-service
+            namespace: multi-app
             labels:
               app: postgres
           spec:
