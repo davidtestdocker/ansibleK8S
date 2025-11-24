@@ -40,7 +40,7 @@ jobs:
             --region ${{ env.REGION }} --format='value(endpoint)')
           CA_CERT=$(gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
             --region ${{ env.REGION }} --format='value(masterAuth.clusterCaCertificate)')
-          cat << 'EOF' > $HOME/.kube/config
+          cat > $HOME/.kube/config <<EOF
           apiVersion: v1
           kind: Config
           clusters:
