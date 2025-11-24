@@ -41,12 +41,19 @@ jobs:
       # ------------------------------------------------------------------
       # 🔥 Debug 2: GKE cluster 描述權限
       # ------------------------------------------------------------------
-      - name: Debug cluster access
+      - name: Debug cluster describe (regional)
         run: |
-          echo "===== Try describing cluster ====="
+          echo "===== Describe (REGIONAL) ====="
           gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-            --zone ${{ env.REGION }}-a \
-            --project ${{ env.PROJECT_ID }} || echo "❌ Cannot describe cluster"
+          --region ${{ env.REGION }} \
+          --project ${{ env.PROJECT_ID }} || echo "❌ Regional describe failed"
+
+      - name: Debug cluster describe (zonal)
+        run: |
+        echo "===== Describe (ZONAL) ====="
+        gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
+        --zone ${{ env.REGION }}-a \
+        --project ${{ env.PROJECT_ID }} || echo "❌ Zonal describe failed"
 
       # ------------------------------------------------------------------
       # 🔥 Debug 3: 列出集群（確認 zonal/regional）
