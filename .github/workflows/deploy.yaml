@@ -40,25 +40,25 @@ jobs:
             --region ${{ env.REGION }} --format='value(endpoint)')
           CA_CERT=$(gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
             --region ${{ env.REGION }} --format='value(masterAuth.clusterCaCertificate)')
-cat <<EOF > $HOME/.kube/config
-apiVersion: v1
-kind: Config
-clusters:
-- name: gke
-  cluster:
-    certificate-authority-data: ${CA_CERT}
-    server: https://${ENDPOINT}
-users:
-- name: gke-user
-  user:
-    token: ${ACCESS_TOKEN}
-contexts:
-- name: gke-context
-  context:
-    cluster: gke
-    user: gke-user
-current-context: gke-context
-EOF
+          cat <<EOF > $HOME/.kube/config
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: gke
+            cluster:
+              certificate-authority-data: ${CA_CERT}
+              server: https://${ENDPOINT}
+          users:
+          - name: gke-user
+            user:
+              token: ${ACCESS_TOKEN}
+          contexts:
+          - name: gke-context
+            context:
+              cluster: gke
+              user: gke-user
+          current-context: gke-context
+          EOF
 
       - name: Debug kubeconfig
         run: cat $HOME/.kube/config
