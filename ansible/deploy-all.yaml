@@ -3,10 +3,6 @@
   hosts: localhost
   gather_facts: no
 
-  # 強制指定 kubeconfig 給 kubernetes.core.k8s
-  environment:
-    KUBECONFIG: "{{ lookup('env','HOME') }}/.kube/config"
-
   vars:
     project_id: "{{ lookup('env','PROJECT_ID') }}"
     region: "{{ lookup('env','REGION') }}"
@@ -16,13 +12,6 @@
     namespace: "multi-app"
 
   tasks:
-
-    # -----------------------------------------------------
-    # (Debug Step) — 確認 gcloud 是否真的登入成功
-    # -----------------------------------------------------
-    - name: Debug gcloud auth
-      ansible.builtin.command: gcloud auth list
-      changed_when: false
 
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）
