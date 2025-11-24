@@ -30,6 +30,14 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           export_default_credentials: true
 
+      - name: Generate kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          gcloud container clusters get-credentials \
+            ${{ env.CLUSTER_NAME }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
       # ------------------------------------------------------------------
       # 🔥 Debug 1: gcloud config 是否正常載入 SA？
       # ------------------------------------------------------------------
@@ -110,7 +118,7 @@ jobs:
           CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
-          K8S_AUTH_KUBECONFIG: "/home/runner/.kube/config"
-          KUBECONFIG: "/home/runner/.kube/config"
+          env:
+            KUBECONFIG: "/home/runner/.kube/config"
         run: |
           ansible-playbook -i inventory deploy-all.yaml
