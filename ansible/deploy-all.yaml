@@ -9,32 +9,16 @@
     cluster_name: "{{ lookup('env','CLUSTER_NAME') }}"
     image_tag: "{{ lookup('env','IMAGE_TAG') }}"
     artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
-    ns: "multi-app"   # <-- 避免 namespace 保留字
-    kubeconfig_path: "/home/runner/.kube/config"
+    ns: "multi-app"
 
+  environment:
+    KUBECONFIG: "{{ lookup('env','KUBECONFIG') }}"
 
   tasks:
-    - name: Ensure kube folder exists
-      ansible.builtin.file:
-        path: "/home/runner/.kube"
-        state: directory
-        mode: '0700'
-      changed_when: false
-    # -----------------------------------------------------
-    # (1) 初始化 kubeconfig（一定要第一個）
-    # -----------------------------------------------------
-
-    # -----------------------------------------------------
-    # (2) Debug — 確認 kubeconfig 是否正確寫入
-    # -----------------------------------------------------
-    - name: Debug kubeconfig
-      ansible.builtin.debug:
-        msg: "Kubeconfig path: {{ kubeconfig_path }}"      
+    - name: Debug kubeconfig inside Ansible
+      command: cat "{{ lookup('env','KUBECONFIG') }}"
       changed_when: false
 
-    # -----------------------------------------------------
-    # (3) Namespace 應用
-    # -----------------------------------------------------
     - name: Ensure namespace exists
       kubernetes.core.k8s:
         state: present
@@ -43,12 +27,7 @@
           kind: Namespace
           metadata:
             name: "{{ ns }}"
-        kubeconfig: "{{ kubeconfig_path }}"
-      register: ns_result
 
-    # -----------------------------------------------------
-    # (4) Import tasks (依順序)
-    # -----------------------------------------------------
     - name: Deploy PVC
       import_tasks: tasks/deploy-pvc.yaml
 

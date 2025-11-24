@@ -2,7 +2,7 @@ name: CI-CD to GKE Autopilot (Terraform + Ansible)
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   IMAGE_TAG: ${{ github.sha }}
@@ -12,71 +12,82 @@ env:
   ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO }}
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-
-      - name: Set up Cloud SDK (Auth)
+      # ----------------------------------------------------------------------
+      # 1️⃣ Google Auth（唯一需要 auth 的地方）
+      # ----------------------------------------------------------------------
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
           export_environment_variables: true
 
-      - name: Set up Cloud SDK
+      - name: Install gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.PROJECT_ID }}
           export_default_credentials: true
 
+      # ----------------------------------------------------------------------
+      # 2️⃣ 產生 kubeconfig（只做一次，不准讓 ansible 再做！！！）
+      # ----------------------------------------------------------------------
       - name: Generate kubeconfig
         run: |
           mkdir -p $HOME/.kube
           KUBECONFIG=$HOME/.kube/config gcloud container clusters get-credentials \
-            ${{ env.CLUSTER_NAME }} \
-            --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }}
+            $CLUSTER_NAME \
+            --region $REGION \
+            --project $PROJECT_ID
 
-      - name: Debug Kubeconfig Content
-        run: cat $HOME/.kube/config # 輸出 Kubeconfig 內容，以便檢查 user 區塊
+      - name: Debug kubeconfig
+        run: cat $HOME/.kube/config
 
-      - name: Configure Docker auth for Artifact Registry
+      # ----------------------------------------------------------------------
+      # 3️⃣ Build & Push Artifact Registry images
+      # ----------------------------------------------------------------------
+      - name: Configure Docker for Artifact Registry
+        run: gcloud --quiet auth configure-docker $REGION-docker.pkg.dev
+
+      - name: Build & Push Images
         run: |
-          gcloud --quiet auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-client:$IMAGE_TAG ./client
+          docker push   $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-client:$IMAGE_TAG
 
-      - name: Build & push images
-        run: |
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-client:${{ env.IMAGE_TAG }} ./client
-          docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-client:${{ env.IMAGE_TAG }}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-server:$IMAGE_TAG ./server
+          docker push   $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-server:$IMAGE_TAG
 
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-server:${{ env.IMAGE_TAG }} ./server
-          docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-server:${{ env.IMAGE_TAG }}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-worker:$IMAGE_TAG ./worker
+          docker push   $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-worker:$IMAGE_TAG
 
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }} ./worker
-          docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }}
-
-     #---------------------------------------------------------------------------------------------------------------------------------------------
+      # ----------------------------------------------------------------------
+      # 4️⃣ Apply Terraform（如果要 apply 自己開）
+      # ----------------------------------------------------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-
-      - name: Terraform init & apply
+      - name: Terraform init & plan
         working-directory: ./tf-gke-autopilot
         run: |
           terraform init -input=false
-          terraform plan -input=false \
-            -var="project_id=${PROJECT_ID}" \
-            -var="region=${REGION}"
-     #----------------------------------------------------------------------------------------------------------------------------------------------------------
+          terraform plan -input=false -var="project_id=$PROJECT_ID" -var="region=$REGION"
 
-      - name: Install Ansible + Kubernetes dependencies
+      # ----------------------------------------------------------------------
+      # 5️⃣ Install Ansible + k8s module
+      # ----------------------------------------------------------------------
+      - name: Install Ansible & Kubernetes modules
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install ansible kubernetes openshift pyyaml
           ansible-galaxy collection install kubernetes.core
 
-      - name: Run Ansible deploy
+      # ----------------------------------------------------------------------
+      # 6️⃣ Run Ansible (不准再用 gcloud get-credentials！！！)
+      # ----------------------------------------------------------------------
+      - name: Run Ansible Deploy
         working-directory: ./ansible
         env:
           PROJECT_ID: ${{ env.PROJECT_ID }}
@@ -84,6 +95,7 @@ jobs:
           CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           ARTIFACT_REPO: ${{ env.ARTIFACT_REPO }}
-
+          KUBECONFIG: $HOME/.kube/config
         run: |
-          KUBECONFIG=$HOME/.kube/config ansible-playbook -i inventory deploy-all.yaml
+          ansible-playbook -i inventory deploy-all.yaml
+
