@@ -11,12 +11,18 @@
     artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
     ns: "multi-app"
 
+  environment:
+    KUBECONFIG: "{{ lookup('env','KUBECONFIG') }}"
 
   tasks:
+
     - name: Debug kubeconfig inside Ansible
       command: cat "{{ lookup('env','KUBECONFIG') }}"
       changed_when: false
 
+    # --------------------------
+    # Namespace
+    # --------------------------
     - name: Ensure namespace exists
       kubernetes.core.k8s:
         state: present
@@ -26,21 +32,33 @@
           metadata:
             name: "{{ ns }}"
 
-    - name: Deploy PVC
-      import_tasks: tasks/deploy-pvc.yaml
+    # --------------------------
+    # Deploy PVC
+    # --------------------------
+    - import_tasks: tasks/deploy-pvc.yaml
 
-    - name: Deploy PostgreSQL
-      import_tasks: tasks/deploy-postgres.yaml
+    # --------------------------
+    # Deploy PostgreSQL
+    # --------------------------
+    - import_tasks: tasks/deploy-postgres.yaml
 
-    - name: Deploy Redis
-      import_tasks: tasks/deploy-redis.yaml
+    # --------------------------
+    # Deploy Redis
+    # --------------------------
+    - import_tasks: tasks/deploy-redis.yaml
 
-    - name: Deploy Server
-      import_tasks: tasks/deploy-server.yaml
+    # --------------------------
+    # Deploy Server
+    # --------------------------
+    - import_tasks: tasks/deploy-server.yaml
 
-    - name: Deploy Worker
-      import_tasks: tasks/deploy-worker.yaml
+    # --------------------------
+    # Deploy Worker
+    # --------------------------
+    - import_tasks: tasks/deploy-worker.yaml
 
-    - name: Deploy Client
-      import_tasks: tasks/deploy-client.yaml
+    # --------------------------
+    # Deploy Client
+    # --------------------------
+    - import_tasks: tasks/deploy-client.yaml
 
