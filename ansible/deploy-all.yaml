@@ -9,7 +9,11 @@
     cluster_name: "{{ lookup('env','CLUSTER_NAME') }}"
     image_tag: "{{ lookup('env','IMAGE_TAG') }}"
     artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
-    namespace: "multi-app"
+    ns: "multi-app"   # <-- 避免 namespace 保留字
+
+  environment:
+    K8S_AUTH_KUBECONFIG: "/home/runner/.kube/config"
+    KUBECONFIG: "/home/runner/.kube/config"
 
   tasks:
 
@@ -24,14 +28,14 @@
       changed_when: false
 
     # -----------------------------------------------------
-    # (Debug Step) — 確認 kubeconfig 是否成功寫入
+    # (2) Debug — 確認 kubeconfig 是否正確寫入
     # -----------------------------------------------------
     - name: Debug kubeconfig
-      ansible.builtin.command: cat ~/.kube/config
+      ansible.builtin.command: cat /home/runner/.kube/config
       changed_when: false
 
     # -----------------------------------------------------
-    # (2) Namespace
+    # (3) Namespace 應用
     # -----------------------------------------------------
     - name: Ensure namespace exists
       kubernetes.core.k8s:
@@ -40,10 +44,10 @@
           apiVersion: v1
           kind: Namespace
           metadata:
-            name: "{{ namespace }}"
+            name: "{{ ns }}"
 
     # -----------------------------------------------------
-    # (3) Import tasks (依順序)
+    # (4) Import tasks (依順序)
     # -----------------------------------------------------
     - name: Deploy PVC
       import_tasks: tasks/deploy-pvc.yaml
