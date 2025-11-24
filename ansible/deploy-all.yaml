@@ -11,8 +11,6 @@
     artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
     ns: "multi-app"
 
-  environment:
-    KUBECONFIG: "{{ lookup('env','KUBECONFIG') }}"
 
   tasks:
     - name: Debug kubeconfig inside Ansible
