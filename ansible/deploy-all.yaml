@@ -10,16 +10,16 @@
     image_tag: "{{ lookup('env','IMAGE_TAG') }}"
     artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
     ns: "multi-app"   # <-- 避免 namespace 保留字
+    kubeconfig_path: "/home/runner/.kube/config"
 
-  environment:
-    KUBECONFIG: "/home/runner/.kube/config"
-    K8S_AUTH_KUBECONFIG: "/home/runner/.kube/config"
 
   tasks:
     - name: Ensure kube folder exists
-      ansible.builtin.command: mkdir -p /home/runner/.kube
+      ansible.builtin.file:
+        path: "/home/runner/.kube"
+        state: directory
+        mode: '0700'
       changed_when: false
-
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）
     # -----------------------------------------------------
@@ -28,13 +28,16 @@
         gcloud container clusters get-credentials {{ cluster_name }}
         --region {{ region }}
         --project {{ project_id }}
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"      
       changed_when: false
 
     # -----------------------------------------------------
     # (2) Debug — 確認 kubeconfig 是否正確寫入
     # -----------------------------------------------------
     - name: Debug kubeconfig
-      ansible.builtin.command: cat /home/runner/.kube/config
+      ansible.builtin.debug:
+        msg: "Kubeconfig path: {{ kubeconfig_path }}"      
       changed_when: false
 
     # -----------------------------------------------------
