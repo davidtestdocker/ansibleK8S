@@ -8,6 +8,10 @@
 
   vars:
     ns: "multi-app"
+    region: "{{ lookup('env','REGION') }}"
+    project_id: "{{ lookup('env','PROJECT_ID') }}"
+    artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
+    image_tag: "{{ lookup('env','IMAGE_TAG') }}"
 
   tasks:
 
