@@ -2,7 +2,7 @@ name: CI-CD to GKE Autopilot
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   IMAGE_TAG: ${{ github.sha }}
@@ -17,22 +17,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # 1. Authenticate to GCP
-      - name: Auth to GCP
+      # 1. GCP auth
+      - name: Set up Cloud SDK (auth)
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
           export_environment_variables: true
 
-      # 2. Install gcloud CLI
-      - name: Set up gcloud
+      - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.PROJECT_ID }}
           export_default_credentials: true
 
-      # 3. Create kubeconfig manually (no gcloud get-credentials)
-      - name: Create kubeconfig
+      # 2. Kubeconfig（無縮排錯誤）
+      - name: Generate kubeconfig manually
         run: |
           mkdir -p $HOME/.kube
 
@@ -65,12 +64,12 @@ EOF
       - name: Debug kubeconfig
         run: cat $HOME/.kube/config
 
-      # 4. Docker auth for Artifact Registry
+      # 3. Docker auth for Artifact Registry
       - name: Configure Docker auth
         run: |
           gcloud --quiet auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-      # 5. Build and push Docker images
+      # 4. Build & Push Docker images
       - name: Build & Push Docker images
         run: |
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-client:${{ env.IMAGE_TAG }} ./client
@@ -82,14 +81,14 @@ EOF
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }} ./worker
           docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }}
 
-      # 6. Install Ansible
+      # 5. Install Ansible & K8s modules
       - name: Install Ansible + K8s libs
         run: |
           python3 -m pip install --upgrade pip
           pip install ansible kubernetes openshift pyyaml
           ansible-galaxy collection install kubernetes.core
 
-      # 7. Run Ansible deployment
+      # 6. Run Ansible deployment（透過 KUBECONFIG）
       - name: Run Ansible Deploy
         working-directory: ./ansible
         env:
