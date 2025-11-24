@@ -16,10 +16,9 @@
     KUBECONFIG: "/home/runner/.kube/config"
 
   tasks:
-
-    - name: Show kubeconfig content
-      shell: cat /home/runner/.kube/config
-
+    - name: Ensure kube folder exists
+      ansible.builtin.command: mkdir -p /home/runner/.kube
+      changed_when: false
 
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）

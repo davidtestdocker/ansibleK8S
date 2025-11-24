@@ -17,8 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Prepare kube folder
-        run: mkdir -p $HOME/.kube
 
       - name: Set up Cloud SDK (Auth)
         uses: google-github-actions/auth@v2
