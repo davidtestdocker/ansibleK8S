@@ -34,6 +34,8 @@
           metadata:
             name: "{{ ns }}"
 
+    - import_tasks: tasks/deploy-ingress.yaml
+
     # --------------------------
     # Deploy PVC
     # --------------------------
