@@ -17,6 +17,10 @@
 
   tasks:
 
+    - name: Show kubeconfig content
+      shell: cat /home/runner/.kube/config
+
+
     # -----------------------------------------------------
     # (1) 初始化 kubeconfig（一定要第一個）
     # -----------------------------------------------------
