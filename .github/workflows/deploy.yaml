@@ -2,7 +2,7 @@ name: CI-CD to GKE Autopilot (Terraform + Ansible)
 
 on:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
 
 env:
   IMAGE_TAG: ${{ github.sha }}
@@ -12,101 +12,99 @@ env:
   ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO }}
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      # -----------------------------
-      # 1. Authenticate GCP
-      # -----------------------------
-      - name: Set up Cloud SDK Auth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 1️⃣ 認證 Google Cloud
+      - name: Set up Cloud Auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
           export_environment_variables: true
 
-      - name: Set up gcloud CLI
+      - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.PROJECT_ID }}
           export_default_credentials: true
 
-      # -----------------------------
-      # 2. Generate WORKING kubeconfig
-      # -----------------------------
-      - name: Generate kubeconfig (static token)
+      # 2️⃣ 取得 GKE API endpoint + CA + token（自動）
+      - name: Fetch cluster endpoint / CA / token
+        id: gke
         run: |
-          mkdir -p $HOME/.kube
-
-          ENDPOINT=$(gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-            --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }} \
+          ENDPOINT=$(gcloud container clusters describe $CLUSTER_NAME \
+            --project $PROJECT_ID --region $REGION \
             --format="value(endpoint)")
 
-          CA_CERT=$(gcloud container clusters describe ${{ env.CLUSTER_NAME }} \
-            --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }} \
+          CA_CERT=$(gcloud container clusters describe $CLUSTER_NAME \
+            --project $PROJECT_ID --region $REGION \
             --format="value(masterAuth.clusterCaCertificate)")
 
           ACCESS_TOKEN=$(gcloud auth print-access-token)
 
-          cat > $HOME/.kube/config <<EOF
-apiVersion: v1
-kind: Config
-clusters:
-- name: gke
-  cluster:
-    certificate-authority-data: ${CA_CERT}
-    server: https://${ENDPOINT}
-users:
-- name: gke-user
-  user:
-    token: ${ACCESS_TOKEN}
-contexts:
-- name: gke-context
-  context:
-    cluster: gke
-    user: gke-user
-current-context: gke-context
-EOF
+          echo "ENDPOINT=$ENDPOINT" >> $GITHUB_ENV
+          echo "CA_CERT=$CA_CERT" >> $GITHUB_ENV
+          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> $GITHUB_ENV
+
+      # 3️⃣ 用 token 建立 kubeconfig（不使用 gcloud get-credentials）
+      - name: Write kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          cat <<EOF > $HOME/.kube/config
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - name: gke
+            cluster:
+              certificate-authority-data: ${CA_CERT}
+              server: https://${ENDPOINT}
+          users:
+          - name: gke-user
+            user:
+              token: ${ACCESS_TOKEN}
+          contexts:
+          - name: gke-context
+            context:
+              cluster: gke
+              user: gke-user
+          current-context: gke-context
+          EOF
 
       - name: Debug kubeconfig
         run: |
-          echo "====== kubeconfig ======"
+          echo "=== KUBECONFIG ==="
           cat $HOME/.kube/config
 
-      # -----------------------------
-      # 3. Docker build + push
-      # -----------------------------
-      - name: Configure Docker auth for Artifact Registry
+      # 4️⃣ Artifact Registry login
+      - name: Docker auth
         run: |
-          gcloud --quiet auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          gcloud --quiet auth configure-docker $REGION-docker.pkg.dev
 
-      - name: Build & push images
+      # 5️⃣ Build & Push 3 images
+      - name: Build and Push images
         run: |
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-client:${{ env.IMAGE_TAG }} ./client
-          docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-client:${{ env.IMAGE_TAG }}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-client:$IMAGE_TAG ./client
+          docker push    $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-client:$IMAGE_TAG
 
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-server:${{ env.IMAGE_TAG }} ./server
-          docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-server:${{ env.IMAGE_TAG }}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-server:$IMAGE_TAG ./server
+          docker push    $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-server:$IMAGE_TAG
 
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }} ./worker
-          docker push    ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/multi-worker:${{ env.IMAGE_TAG }}
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-worker:$IMAGE_TAG ./worker
+          docker push    $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/multi-worker:$IMAGE_TAG
 
-      # -----------------------------
-      # 4. Install Ansible
-      # -----------------------------
-      - name: Install Ansible + dependencies
+      # 6️⃣ Install Ansible + Kubernetes modules
+      - name: Install Ansible
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install ansible kubernetes openshift pyyaml
+          pip install --upgrade pip
+          pip install ansible kubernetes openshift pyyaml
           ansible-galaxy collection install kubernetes.core
 
-      # -----------------------------
-      # 5. Run Ansible (using fixed kubeconfig)
-      # -----------------------------
-      - name: Run Ansible Deploy
+      # 7️⃣ Run Ansible deploy
+      - name: Run Ansible deploy
         working-directory: ./ansible
         env:
           PROJECT_ID: ${{ env.PROJECT_ID }}
