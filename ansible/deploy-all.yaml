@@ -12,6 +12,7 @@
     project_id: "{{ lookup('env','PROJECT_ID') }}"
     artifact_repo: "{{ lookup('env','ARTIFACT_REPO') }}"
     image_tag: "{{ lookup('env','IMAGE_TAG') }}"
+    pg_password: "{{ lookup('env','PG_PASSWORD') }}"
 
   tasks:
 
@@ -33,6 +34,8 @@
           kind: Namespace
           metadata:
             name: "{{ ns }}"
+     
+    - import_tasks: tasks/deploy-secretpg.yaml       
 
     - import_tasks: tasks/deploy-ingress.yaml
 

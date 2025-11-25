@@ -1,4 +1,3 @@
-
     - name: Apply worker Deployment
       kubernetes.core.k8s:
         state: present
@@ -23,6 +22,20 @@
                 containers:
                   - name: worker
                     image: "{{ region }}-docker.pkg.dev/{{ project_id }}/{{ artifact_repo }}/multi-worker:{{ image_tag }}"
+                    
+                    # -------------------------
+                    # Autopilot 推薦最小資源
+                    # -------------------------
+                    resources:
+                      requests:
+                        cpu: "100m"
+                        memory: "256Mi"
+                        ephemeral-storage: "1Gi"
+                      limits:
+                        cpu: "250m"
+                        memory: "512Mi"
+                        ephemeral-storage: "2Gi"
+
                     env:
                       - name: REDIS_HOST
                         value: redis-clusterip-service
