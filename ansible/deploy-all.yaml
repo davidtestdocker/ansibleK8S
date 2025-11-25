@@ -39,8 +39,6 @@
      
     - import_tasks: tasks/deploy-secretpg.yaml       
 
-    - import_tasks: tasks/ingress-service.yaml
-
     # --------------------------
     # Deploy PVC
     # --------------------------
@@ -70,4 +68,6 @@
     # Deploy Client
     # --------------------------
     - import_tasks: tasks/deploy-client.yaml
+
+    - import_tasks: tasks/deploy-ingress.yaml
 
