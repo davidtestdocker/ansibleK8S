@@ -22,6 +22,10 @@
             containers:
               - name: client
                 image: "{{ region }}-docker.pkg.dev/{{ project_id }}/{{ artifact_repo }}/multi-client:{{ image_tag }}"
+                resources:
+                  requests:
+                    cpu: "50m"
+                    memory: "128Mi"
                 ports:
                   - containerPort: 3000
 

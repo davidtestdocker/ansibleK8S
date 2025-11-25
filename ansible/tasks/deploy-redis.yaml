@@ -22,6 +22,10 @@
                 containers:
                   - name: redis
                     image: redis
+                    resources:
+                      requests:
+                        cpu: "50m"
+                        memory: "128Mi"
                     ports:
                       - containerPort: 6379
 

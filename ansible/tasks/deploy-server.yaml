@@ -24,6 +24,10 @@
                 containers:
                   - name: server
                     image: "{{ region }}-docker.pkg.dev/{{ project_id }}/{{ artifact_repo }}/multi-server:{{ image_tag }}"
+                    resources:
+                      requests:
+                        cpu: "100m"
+                        memory: "128Mi"
                     ports:
                       - containerPort: 5000
                     env:
