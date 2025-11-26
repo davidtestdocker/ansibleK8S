@@ -89,5 +89,9 @@
 <hr>
 <strong>部署完驗證</strong>
 <p>kubectl get deployment -n  multi-app</p>
-<p>看部屬服務狀況</p>
-<img src=""></img>
+<img src="img/螢幕擷取畫面 2025-11-26 225643.png"></img>
+<p>確保helm負載平衡有下載成功，並查看其ip</p>
+<p>kubectl get service ingress-nginx-controller --namespace=ingress-nginx</p>
+<img src="img/螢幕擷取畫面 2025-11-26 232422.png"></img>
+<p>結果成功</p>
+<img src="img/螢幕擷取畫面 2025-11-26 230457.png"></img>
