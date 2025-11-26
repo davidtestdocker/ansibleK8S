@@ -30,7 +30,7 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
           export_default_credentials: true
 
-      # 2. Kubeconfig（無縮排錯誤）
+      # 2. Kubeconfig
       - name: Generate kubeconfig manually
         run: |
           mkdir -p $HOME/.kube
@@ -68,8 +68,6 @@ jobs:
           cat $HOME/.kube/config || echo "(FILE NOT FOUND)"
           echo "---------------"
 
-      - name: Debug kubeconfig
-        run: cat $HOME/.kube/config
 
       # 3. Docker auth for Artifact Registry
       - name: Configure Docker auth
