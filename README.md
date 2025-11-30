@@ -95,3 +95,6 @@
 <img src="img/螢幕擷取畫面 2025-11-26 232422.png"></img>
 <p>結果成功</p>
 <img src="img/螢幕擷取畫面 2025-11-26 230457.png"></img>
+<hr>
+<h1>拿掉ansible用argo cd 版本</h1>
+https://github.com/davidtestdocker/GitOpsK8S
